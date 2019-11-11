@@ -6,6 +6,7 @@
 #include <tchar.h>
 #include <wingdi.h>
 #include "Glyph.h"
+#include "Path.h"
 
 // Global variables
 
@@ -137,6 +138,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
+		bool fContinue = true;
+		PTCHAR szDirPath = Path_GetCombined(PATH_CURRENT_DIRECTORY, GLYPH_DIRECTORY_NAME);
+		if (szDirPath != NULL)
+		{
+			if (!PathIsDirectory(szDirPath))
+			{
+				fContinue = CreateDirectory(szDirPath, NULL);
+				if (fContinue)
+				{
+					//Save glyphs in this dir
+				}
+			}
+		}
+		Path_ReleaseCombined(&szDirPath);
+
 		hdc = GetDC(hWnd);
 		
 		INT iHeight = -MulDiv(32, GetDeviceCaps(hdc, LOGPIXELSY), 72);
@@ -145,12 +161,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			FIXED_PITCH | FF_MODERN, NULL);
 		hfOld = SelectObject(hdc, hfNew);
 		ReleaseDC(hWnd, hdc);
-
-		DWORD dwSize = GetCurrentDirectory(0, NULL);
-		PTCHAR szCurrentDirectory = calloc(dwSize, sizeof(TCHAR));
-		dwSize = GetCurrentDirectory(dwSize, szCurrentDirectory);
-		szCurrentDirectory = realloc(szCurrentDirectory, dwSize + 1);
-		Glyph_CheckDirectory(szCurrentDirectory);
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);

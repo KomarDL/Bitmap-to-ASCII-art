@@ -118,10 +118,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Glyph.c" />
+    <ClCompile Include="Path.c" />
     <ClCompile Include="Source.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Glyph.h" />
+    <ClInclude Include="Path.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
