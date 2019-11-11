@@ -2,9 +2,17 @@
 
 #include <Windows.h>
 #include <stdio.h>
+#include <tchar.h>
+#include <stdbool.h>
+#include <Shlwapi.h>
+
+#pragma comment(lib, "shlwapi.lib")
 
 #define GLYPH_PALLETE_SIZE 65
 #define GLYPH_MAX_COLOR_SHADES 256
+#define GLYPH_DIRECTORY_NAME _T("Glyphs")
+
+bool Glyph_CheckDirectory(TCHAR path[]);
 
 PBYTE Glyph_Get(HDC hdc, UINT uSymbol, PDWORD pdwBufferSize);
 

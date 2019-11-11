@@ -145,6 +145,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			FIXED_PITCH | FF_MODERN, NULL);
 		hfOld = SelectObject(hdc, hfNew);
 		ReleaseDC(hWnd, hdc);
+
+		DWORD dwSize = GetCurrentDirectory(0, NULL);
+		PTCHAR szCurrentDirectory = calloc(dwSize, sizeof(TCHAR));
+		dwSize = GetCurrentDirectory(dwSize, szCurrentDirectory);
+		szCurrentDirectory = realloc(szCurrentDirectory, dwSize + 1);
+		Glyph_CheckDirectory(szCurrentDirectory);
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
@@ -155,7 +161,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PBYTE pbGlyph = Glyph_Get(hdc, _T('A'), &dwGlyphSize);
 		Glyph_Save(pbGlyph, dwGlyphSize, sBitmap, "1.bmp");
 		Glyph_Release(&pbGlyph);
-
+		
 		RECT rc = { 0 };
 		DrawText(hdc, _T("A"), -1, &rc, DT_CALCRECT);
 		DrawText(hdc, _T("A"), -1, &rc, 0);

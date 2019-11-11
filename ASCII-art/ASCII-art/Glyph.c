@@ -105,3 +105,11 @@ void Glyph_Release(PBYTE* ppbGlyph)
 	free(*ppbGlyph);
 	*ppbGlyph = NULL;
 }
+
+bool Glyph_CheckDirectory(TCHAR path[])
+{
+	TCHAR szFullPath[MAX_PATH];
+	PathCombine(szFullPath, path, GLYPH_DIRECTORY_NAME);
+	return PathIsDirectory(szFullPath);
+}
+
