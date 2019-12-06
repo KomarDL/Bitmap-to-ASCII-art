@@ -24,12 +24,18 @@
     <ClCompile Include="Path.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="FirstStartInitialization.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Glyph.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Path.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="FirstStartInitialization.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

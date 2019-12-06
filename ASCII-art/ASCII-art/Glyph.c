@@ -90,7 +90,7 @@ void Glyph_Save(BYTE pbData[], DWORD dwDataSize, SIZE sBitmap, PWSTR szPath)
 		* sizeof(RGBQUAD);
 	
 	FILE *pf;
-	int writeRes = fopen_s(&pf, szPath, "wb");
+	int writeRes = _wfopen_s(&pf, szPath, L"wb");
 	writeRes = fwrite(&bf, sizeof(bf), 1, pf);
 	writeRes = fwrite(&bi, sizeof(bi), 1, pf);
 

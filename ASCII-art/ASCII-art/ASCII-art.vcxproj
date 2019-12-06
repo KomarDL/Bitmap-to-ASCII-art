@@ -117,11 +117,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FirstStartInitialization.c" />
     <ClCompile Include="Glyph.c" />
     <ClCompile Include="Path.c" />
     <ClCompile Include="Source.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FirstStartInitialization.h" />
     <ClInclude Include="Glyph.h" />
     <ClInclude Include="Path.h" />
   </ItemGroup>

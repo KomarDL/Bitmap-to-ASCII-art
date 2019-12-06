@@ -3,10 +3,10 @@
 
 #include <windows.h>
 #include <stdlib.h>
-#include <tchar.h>
 #include <wingdi.h>
 #include "Glyph.h"
 #include "Path.h"
+#include "FirstStartInitialization.h"
 
 // Global variables
 
@@ -18,13 +18,15 @@ WCHAR szTitle[] = L"Spreadsheet";
 
 CONST WCHAR szDataPath[] = L"Data.glf";
 
+CONST WCHAR szGlyphDirPath[] = L"Glyphs";
+
 HINSTANCE hInst;
 
 // old font handle
 HFONT hfOld = NULL;
 HFONT hfNew = NULL;
 
-WCHAR szGlyphs[] = L"`.,:;/\\%&*?@#=";
+WCHAR szSymbols[] = L"`.,:;/\\%&*?@#=";
 
 
 // Forward declarations of functions included in this code module:
@@ -145,7 +147,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		BOOL fContinue = TRUE;
 		if (!PathFileExists(szDataPath))
 		{
-			
+			if (!FirstStart_CreateDataFiles(szDataPath, szSymbols, szGlyphDirPath))
+			{
+				//
+				MessageBox(NULL,
+					L"Can't create data",
+					L"Windows Desktop Guided Tour",
+					MB_ICONERROR);
+				SendMessage(hWnd, WM_DESTROY, 0, 0);
+			}
 		}
 		//PWSTR szDirPath = Path_GetCombined(PATH_CURRENT_DIRECTORY, GLYPH_DIRECTORY_NAME);
 		//if (szDirPath != NULL)
@@ -155,7 +165,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		//		fContinue = CreateDirectory(szDirPath, NULL);
 		//		if (fContinue)
 		//		{
-		//			//Glyph_StrToGlyphs(szGlyphs, szDirPath);
+		//			//Glyph_StrToGlyphs(szSymbols, szDirPath);
 		//		}
 		//	}
 		//	else
@@ -165,7 +175,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		//		{
 		//			if (PathIsDirectoryEmpty(szDirPath))
 		//			{
-		//				//Glyph_StrToGlyphs(szGlyphs, szDirPath);
+		//				//Glyph_StrToGlyphs(szSymbols, szDirPath);
 		//			}
 		//		}
 		//		else

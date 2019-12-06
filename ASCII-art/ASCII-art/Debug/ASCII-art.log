@@ -1,3 +1,2 @@
-﻿  Source.c
-h:\проекты\семестр 5\осисп\курсовой проект\ascii-art\ascii-art\source.c(202): warning C4133: функция: несовместимые типы - из "char [6]" в "PTCHAR"
+﻿  Path.c
   ASCII-art.vcxproj -> H:\Проекты\Семестр 5\ОСиСП\Курсовой проект\ASCII-art\Debug\ASCII-art.exe
