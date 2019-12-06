@@ -12,6 +12,6 @@ PWSTR Path_GetCombined(WCHAR szBeginPath[], WCHAR szEndPath[]);
 
 void Path_ReleaseCombined(PWSTR szDirPath);
 
-PWSTR Path_GetGlyphFileName(WORD wSymbolCode, WCHAR szExtention[]);
+PWSTR Path_GetGlyphFileName(WORD wSymbolCode, CONST WCHAR szExtention[]);
 
-PZPWSTR Path_GetGlyphsFileNames(WCHAR szSymbols[], WCHAR szExtention[]);
+PZPWSTR Path_GetGlyphsFileNames(CONST WCHAR szSymbols[], CONST WCHAR szExtention[]);

@@ -1,6 +1,3 @@
-#define UNICODE
-#define _UNICODE
-
 #include <windows.h>
 #include <stdlib.h>
 #include <wingdi.h>
@@ -26,7 +23,7 @@ HINSTANCE hInst;
 HFONT hfOld = NULL;
 HFONT hfNew = NULL;
 
-WCHAR szSymbols[] = L"`.,:;/\\%&*?@#=";
+CONST WCHAR szSymbols[] = L"`.,:;/\\%&*?@#=";
 
 
 // Forward declarations of functions included in this code module:
@@ -39,7 +36,7 @@ INT CALLBACK WinMain(
 	_In_ INT       nCmdShow
 )
 {
-	WNDCLASSEX wcex;
+	WNDCLASSEXW wcex;
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -54,9 +51,9 @@ INT CALLBACK WinMain(
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 
-	if (!RegisterClassEx(&wcex))
+	if (!RegisterClassExW(&wcex))
 	{
-		MessageBox(NULL,
+		MessageBoxW(NULL,
 			L"Call to RegisterClassEx failed!",
 			L"Windows Desktop Guided Tour",
 			MB_ICONERROR);
@@ -77,7 +74,7 @@ INT CALLBACK WinMain(
 	// NULL: this application does not have a menu bar
 	// hInstance: the first parameter from WinMain
 	// NULL: not used in this application
-	HWND hWnd = CreateWindow(
+	HWND hWnd = CreateWindowW(
 		szWindowClass,
 		szTitle,
 		WS_OVERLAPPEDWINDOW,
@@ -91,7 +88,7 @@ INT CALLBACK WinMain(
 
 	if (!hWnd)
 	{
-		MessageBox(NULL,
+		MessageBoxW(NULL,
 			L"Call to CreateWindow failed!",
 			L"Windows Desktop Guided Tour",
 			MB_ICONERROR);
@@ -110,11 +107,11 @@ INT CALLBACK WinMain(
 	MSG msg;
 	BOOL bRet;
 
-	while ((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
+	while ((bRet = GetMessageW(&msg, NULL, 0, 0)) != 0)
 	{
 		if (bRet == -1)
 		{
-			MessageBox(NULL,
+			MessageBoxW(NULL,
 				L"Call to GetMessage failed!",
 				L"Windows Desktop Guided Tour",
 				MB_ICONERROR);
@@ -145,12 +142,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		BOOL fContinue = TRUE;
-		if (!PathFileExists(szDataPath))
+		if (!PathFileExistsW(szDataPath))
 		{
 			if (!FirstStart_CreateDataFiles(szDataPath, szSymbols, szGlyphDirPath))
 			{
 				//
-				MessageBox(NULL,
+				MessageBoxW(NULL,
 					L"Can't create data",
 					L"Windows Desktop Guided Tour",
 					MB_ICONERROR);
@@ -210,11 +207,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		DWORD dwGlyphSize;
 		PBYTE pbGlyph = Glyph_Get(hdc, L'A', &dwGlyphSize);
 		Glyph_Save(pbGlyph, dwGlyphSize, sBitmap, L"1.bmp");
-		Glyph_Release(&pbGlyph);
+		Glyph_Release(pbGlyph);
 		
 		RECT rc = { 0 };
-		DrawText(hdc, L"A", -1, &rc, DT_CALCRECT);
-		DrawText(hdc, L"A", -1, &rc, 0);
+		DrawTextW(hdc, L"A", -1, &rc, DT_CALCRECT);
+		DrawTextW(hdc, L"A", -1, &rc, 0);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:

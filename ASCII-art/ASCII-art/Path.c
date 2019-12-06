@@ -24,7 +24,7 @@ void Path_ReleaseCombined(PWSTR szDirPath)
 	free(szDirPath);
 }
 
-PWSTR Path_GetGlyphFileName(WORD wSymbolCode, WCHAR szExtention[])
+PWSTR Path_GetGlyphFileName(WORD wSymbolCode, CONST WCHAR szExtention[])
 {
 	SIZE_T stResultSize = MAX_PATH * sizeof(WCHAR);
 	PWSTR szResult = malloc(stResultSize);
@@ -37,7 +37,7 @@ PWSTR Path_GetGlyphFileName(WORD wSymbolCode, WCHAR szExtention[])
 	return szResult;
 }
 
-PZPWSTR Path_GetGlyphsFileNames(WCHAR szSymbols[], WCHAR szExtention[])
+PZPWSTR Path_GetGlyphsFileNames(CONST WCHAR szSymbols[], CONST WCHAR szExtention[])
 {
 	SIZE_T stSymbolsLength = wcslen(szSymbols);
 	PZPWSTR pszResult = calloc(stSymbolsLength, sizeof(PWSTR));

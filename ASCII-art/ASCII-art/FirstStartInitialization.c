@@ -2,7 +2,7 @@
 #include "Path.h"
 #include "FirstStartInitialization.h"
 
-BOOL FirstStart_CreateDataFiles(WCHAR szDataPath[], WCHAR szSymbols[], WCHAR szGlyphDirPath[])
+BOOL FirstStart_CreateDataFiles(CONST WCHAR szDataPath[], CONST WCHAR szSymbols[], CONST WCHAR szGlyphDirPath[])
 {
 	BOOL fResult = CreateDirectoryW(szGlyphDirPath, NULL);
 	if (fResult)
@@ -20,4 +20,5 @@ BOOL FirstStart_CreateDataFiles(WCHAR szDataPath[], WCHAR szSymbols[], WCHAR szG
 		}
 		
 	}
+	return fResult;
 }
