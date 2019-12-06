@@ -64,7 +64,7 @@ void Glyph_WritePallete(FILE *pf, DWORD dwPalleteSize)
 }
 
 
-void Glyph_Save(BYTE pbData[], DWORD dwDataSize, SIZE sBitmap, PTCHAR szPath)
+void Glyph_Save(BYTE pbData[], DWORD dwDataSize, SIZE sBitmap, PWSTR szPath)
 {
 	BITMAPINFOHEADER bi = { 0 };
 	bi.biSize = sizeof(BITMAPINFOHEADER);
@@ -100,8 +100,6 @@ void Glyph_Save(BYTE pbData[], DWORD dwDataSize, SIZE sBitmap, PTCHAR szPath)
 	fclose(pf);
 }
 
-void Glyph_Release(PBYTE* ppbGlyph)
+void Glyph_Release(PBYTE pbGlyph)
 {
-	free(*ppbGlyph);
-	*ppbGlyph = NULL;
-}
+	free(pbGlyph);}

@@ -1,5 +1,5 @@
-//#define UNICODE
-//#define _UNICODE
+#define UNICODE
+#define _UNICODE
 
 #include <windows.h>
 #include <stdlib.h>
@@ -11,16 +11,20 @@
 // Global variables
 
 // The main window class name.
-TCHAR szWindowClass[] = _T("Spreadsheet");
+WCHAR szWindowClass[] = L"Spreadsheet";
 
 // The string that appears in the application's title bar.
-TCHAR szTitle[] = _T("Spreadsheet");
+WCHAR szTitle[] = L"Spreadsheet";
+
+CONST WCHAR szDataPath[] = L"Data.glf";
 
 HINSTANCE hInst;
 
 // old font handle
 HFONT hfOld = NULL;
 HFONT hfNew = NULL;
+
+WCHAR szGlyphs[] = L"`.,:;/\\%&*?@#=";
 
 
 // Forward declarations of functions included in this code module:
@@ -51,8 +55,8 @@ INT CALLBACK WinMain(
 	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,
-			_T("Call to RegisterClassEx failed!"),
-			_T("Windows Desktop Guided Tour"),
+			L"Call to RegisterClassEx failed!",
+			L"Windows Desktop Guided Tour",
 			MB_ICONERROR);
 
 		return 1;
@@ -86,8 +90,8 @@ INT CALLBACK WinMain(
 	if (!hWnd)
 	{
 		MessageBox(NULL,
-			_T("Call to CreateWindow failed!"),
-			_T("Windows Desktop Guided Tour"),
+			L"Call to CreateWindow failed!",
+			L"Windows Desktop Guided Tour",
 			MB_ICONERROR);
 
 		return 1;
@@ -109,8 +113,8 @@ INT CALLBACK WinMain(
 		if (bRet == -1)
 		{
 			MessageBox(NULL,
-				_T("Call to GetMessage failed!"),
-				_T("Windows Desktop Guided Tour"),
+				L"Call to GetMessage failed!",
+				L"Windows Desktop Guided Tour",
 				MB_ICONERROR);
 			return -1;
 		}
@@ -138,52 +142,75 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
-		bool fContinue = true;
-		PTCHAR szDirPath = Path_GetCombined(PATH_CURRENT_DIRECTORY, GLYPH_DIRECTORY_NAME);
-		if (szDirPath != NULL)
+		BOOL fContinue = TRUE;
+		if (!PathFileExists(szDataPath))
 		{
-			if (!PathIsDirectory(szDirPath))
-			{
-				fContinue = CreateDirectory(szDirPath, NULL);
-				if (fContinue)
-				{
-					//Save glyphs in this dir
-				}
-			}
+			
 		}
-		Path_ReleaseCombined(&szDirPath);
+		//PWSTR szDirPath = Path_GetCombined(PATH_CURRENT_DIRECTORY, GLYPH_DIRECTORY_NAME);
+		//if (szDirPath != NULL)
+		//{
+		//	if (!PathFileExists(szDirPath))
+		//	{
+		//		fContinue = CreateDirectory(szDirPath, NULL);
+		//		if (fContinue)
+		//		{
+		//			//Glyph_StrToGlyphs(szGlyphs, szDirPath);
+		//		}
+		//	}
+		//	else
+		//	{
+		//		fContinue = PathIsDirectory(szDirPath);
+		//		if (fContinue)
+		//		{
+		//			if (PathIsDirectoryEmpty(szDirPath))
+		//			{
+		//				//Glyph_StrToGlyphs(szGlyphs, szDirPath);
+		//			}
+		//		}
+		//		else
+		//		{
+		//			//msg for user
+		//		}
+		//	}
+		//}
+		//Path_ReleaseCombined(&szDirPath);
+		//if (!fContinue)
+		//{
+		//	PostQuitMessage(0);
+		//}
+		//else
+		//{
+		//	hdc = GetDC(hWnd);
 
-		hdc = GetDC(hWnd);
-		
-		INT iHeight = -MulDiv(32, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-		hfNew = CreateFont(iHeight, iHeight, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET,
-			OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-			FIXED_PITCH | FF_MODERN, NULL);
-		hfOld = SelectObject(hdc, hfNew);
-		ReleaseDC(hWnd, hdc);
+		//	INT iHeight = -MulDiv(256, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+		//	hfNew = CreateFont(iHeight, iHeight, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET,
+		//		OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+		//		FIXED_PITCH | FF_MODERN, NULL);
+		//	hfOld = SelectObject(hdc, hfNew);
+		//	ReleaseDC(hWnd, hdc);
+		//}
+
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 
 
-		SIZE sBitmap = Glyph_GetSize(hdc, _T('A'));
+		SIZE sBitmap = Glyph_GetSize(hdc, L'A');
 		DWORD dwGlyphSize;
-		PBYTE pbGlyph = Glyph_Get(hdc, _T('A'), &dwGlyphSize);
-		Glyph_Save(pbGlyph, dwGlyphSize, sBitmap, "1.bmp");
+		PBYTE pbGlyph = Glyph_Get(hdc, L'A', &dwGlyphSize);
+		Glyph_Save(pbGlyph, dwGlyphSize, sBitmap, L"1.bmp");
 		Glyph_Release(&pbGlyph);
 		
 		RECT rc = { 0 };
-		DrawText(hdc, _T("A"), -1, &rc, DT_CALCRECT);
-		DrawText(hdc, _T("A"), -1, &rc, 0);
+		DrawText(hdc, L"A", -1, &rc, DT_CALCRECT);
+		DrawText(hdc, L"A", -1, &rc, 0);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-		break;
+		
 	}
-
-	return 0;
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }

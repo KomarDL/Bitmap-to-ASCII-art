@@ -6,8 +6,8 @@
 
 #pragma comment(lib, "shlwapi.lib")
 
-#define PATH_CURRENT_DIRECTORY _T(".")
+#define PATH_CURRENT_DIRECTORY L"."
 
-PTCHAR Path_GetCombined(TCHAR szBeginPath[], TCHAR szEndPath[]);
+PWSTR Path_GetCombined(WCHAR szBeginPath[], WCHAR szEndPath[]);
 
-void Path_ReleaseCombined(PTCHAR *pszDirPath);
+void Path_ReleaseCombined(PWSTR szDirPath);

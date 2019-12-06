@@ -1,12 +1,12 @@
 #include "Path.h"
 
-PTCHAR Path_GetCombined(TCHAR szBeginPath[], TCHAR szEndPath[])
+PWSTR Path_GetCombined(WCHAR szBeginPath[], WCHAR szEndPath[])
 {
-	PTCHAR szFullPath = calloc(MAX_PATH, sizeof(TCHAR));
-	PTCHAR szResult = PathCombine(szFullPath, szBeginPath, szEndPath);
+	PWSTR szFullPath = calloc(MAX_PATH, sizeof(WCHAR));
+	PWSTR szResult = PathCombine(szFullPath, szBeginPath, szEndPath);
 	if (szResult != NULL)
 	{
-		INT iRealPathSize = (_tcslen(szResult) + 1) * sizeof(TCHAR);
+		INT iRealPathSize = (_tcslen(szResult) + 1) * sizeof(WCHAR);
 		szResult = realloc(szResult, iRealPathSize);
 	}
 	else
@@ -16,8 +16,7 @@ PTCHAR Path_GetCombined(TCHAR szBeginPath[], TCHAR szEndPath[])
 	return szResult;
 }
 
-void Path_ReleaseCombined(PTCHAR *pszDirPath)
+void Path_ReleaseCombined(PWSTR szDirPath)
 {
-	free(*pszDirPath);
-	*pszDirPath = NULL;
+	free(szDirPath);
 }
