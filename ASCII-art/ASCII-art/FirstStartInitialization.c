@@ -36,35 +36,56 @@ HDC CreateMemoryDC(HDC hdc)
 	return hdcResult;
 }
 
+BOOL SaveAllGlyphs(HDC hdc, PZPCWSTR pszFileNames, CONST WCHAR szSymbols[], CONST WCHAR szGlyphDirPath[])
+{
+	HDC hdcMem = CreateMemoryDC(hdc);
+
+	BOOL fResult = (hdcMem != NULL);
+	if (fResult)
+	{
+		SIZE_T i = -1;
+		while (++i < wcslen(szSymbols) && fResult)
+		{
+			PWSTR szPath = Path_GetCombined(szGlyphDirPath, pszFileNames[i]);
+			fResult = Glyph_Save(hdcMem, szPath, szSymbols[i]);
+			Path_ReleaseCombined(szPath);
+		}
+		DeleteDC(hdcMem);
+	}
+	return fResult;
+}
+
 BOOL FirstStart_CreateDataFiles(HDC hdc, CONST WCHAR szDataPath[], CONST WCHAR szSymbols[], CONST WCHAR szGlyphDirPath[])
 {
+	PZPWSTR pszFileNames;
 	BOOL fResult = CreateDirectoryW(szGlyphDirPath, NULL);
 	if (fResult)
 	{
-		PZPWSTR pszFileNames = Path_GetGlyphsFileNames(szSymbols, GLYPH_FILE_EXTENSION);
+		pszFileNames = Path_GetGlyphsFileNames(szSymbols, GLYPH_FILE_EXTENSION);
 		fResult = (pszFileNames != NULL);
 		if (fResult)
 		{
-			HDC hdcMem = CreateMemoryDC(hdc);
-			
-			fResult = (hdcMem != NULL);
-			if (fResult)
-			{
-				SIZE_T i = -1;
-				while (++i < wcslen(szSymbols) && fResult)
-				{
-					PWSTR szPath = Path_GetCombined(szGlyphDirPath, pszFileNames[i]);
-					fResult = Glyph_Save(hdcMem, szPath, szSymbols[i]);
-					Path_ReleaseCombined(szPath);
-				}
-				DeleteDC(hdcMem);
-			}
+			fResult = SaveAllGlyphs(hdc, pszFileNames, szSymbols, szGlyphDirPath);
 		}
 		else
 		{
 			RemoveDirectoryW(szGlyphDirPath);
 		}
-		Path_ReleaseGlyphsFileNames(pszFileNames, lstrlenW(szSymbols));
+
+		/*PGlBrightness pgb = calloc(wcslen(szSymbols), sizeof(GlBrightness));
+		fResult = (pgb != NULL);
+		if (fResult)
+		{
+			SIZE_T i = -1;
+			while (++i < wcslen(szSymbols) && fResult)
+			{
+				PWSTR szPath = Path_GetCombined(szGlyphDirPath, pszFileNames[i]);
+				pgb = Glyph_GetBrightness(szPath);
+				Path_ReleaseCombined(szPath);
+			}
+		}*/
+
+		Path_ReleaseGlyphsFileNames(pszFileNames, wcslen(szSymbols));
 	}
 	return fResult;
 }
