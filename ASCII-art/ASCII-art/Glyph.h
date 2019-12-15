@@ -19,4 +19,11 @@
 //
 //void Glyph_Save(BYTE pbData[], DWORD dwDataSize, SIZE sBitmap, CONST WCHAR szPath[]);
 
+typedef struct _GlyphBrightness
+{
+	LONG top[3];
+	LONG middle[3];
+	LONG bottom[3];
+} GlBrightness, *PGlBrightness;
+
 BOOL Glyph_Save(HDC hdc, PCWSTR szPath, WCHAR wchSymbol);
