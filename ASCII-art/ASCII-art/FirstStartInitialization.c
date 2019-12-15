@@ -64,6 +64,7 @@ BOOL FirstStart_CreateDataFiles(HDC hdc, CONST WCHAR szDataPath[], CONST WCHAR s
 		{
 			RemoveDirectoryW(szGlyphDirPath);
 		}
+		Path_ReleaseGlyphsFileNames(pszFileNames, lstrlenW(szSymbols));
 	}
 	return fResult;
 }

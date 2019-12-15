@@ -62,3 +62,12 @@ PZPWSTR Path_GetGlyphsFileNames(CONST WCHAR szSymbols[], CONST WCHAR szExtention
 	}
 	return pszResult;
 }
+
+void Path_ReleaseGlyphsFileNames(PZPWSTR pszNames, SIZE_T stLength)
+{
+	for (SIZE_T i = 0; i < stLength; ++i)
+	{
+		free(pszNames[i]);
+	}
+	free(pszNames);
+}
