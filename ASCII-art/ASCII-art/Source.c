@@ -1,9 +1,13 @@
+#define UNICODE
+#define _UNICODE
+
 #include <windows.h>
 #include <stdlib.h>
 #include <wingdi.h>
 #include "Glyph.h"
 #include "Path.h"
 #include "FirstStartInitialization.h"
+#include "Font.h"
 
 // Global variables
 
@@ -23,7 +27,7 @@ HINSTANCE hInst;
 HFONT hfOld = NULL;
 HFONT hfNew = NULL;
 
-CONST WCHAR szSymbols[] = L"`.,:;/\\%&*?@#=";
+CONST WCHAR szSymbols[] = L"!`.,:;/\\%&*?@#=";
 
 
 // Forward declarations of functions included in this code module:
@@ -141,19 +145,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
+		hdc = GetDC(hWnd);
+
+		Font_Initialize(hdc);
+
 		BOOL fContinue = TRUE;
 		if (!PathFileExistsW(szDataPath))
 		{
-			if (!FirstStart_CreateDataFiles(szDataPath, szSymbols, szGlyphDirPath))
+			if (!FirstStart_CreateDataFiles(hdc, szDataPath, szSymbols, szGlyphDirPath))
 			{
-				//
 				MessageBoxW(NULL,
 					L"Can't create data",
 					L"Windows Desktop Guided Tour",
 					MB_ICONERROR);
-				SendMessage(hWnd, WM_DESTROY, 0, 0);
+				SendMessageW(hWnd, WM_DESTROY, 0, 0);
 			}
 		}
+
+		ReleaseDC(hWnd, hdc);
 		//PWSTR szDirPath = Path_GetCombined(PATH_CURRENT_DIRECTORY, GLYPH_DIRECTORY_NAME);
 		//if (szDirPath != NULL)
 		//{
@@ -190,28 +199,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		//{
 		//	hdc = GetDC(hWnd);
 
-		//	INT iHeight = -MulDiv(256, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-		//	hfNew = CreateFont(iHeight, iHeight, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET,
-		//		OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-		//		FIXED_PITCH | FF_MODERN, NULL);
-		//	hfOld = SelectObject(hdc, hfNew);
-		//	ReleaseDC(hWnd, hdc);
+		
+		
 		//}
 
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 
+		
 
-		SIZE sBitmap = Glyph_GetSize(hdc, L'A');
+		/*SIZE sBitmap = Glyph_GetSize(hdc, L'A');
 		DWORD dwGlyphSize;
 		PBYTE pbGlyph = Glyph_Get(hdc, L'A', &dwGlyphSize);
 		Glyph_Save(pbGlyph, dwGlyphSize, sBitmap, L"1.bmp");
 		Glyph_Release(pbGlyph);
-		
-		RECT rc = { 0 };
-		DrawTextW(hdc, L"A", -1, &rc, DT_CALCRECT);
-		DrawTextW(hdc, L"A", -1, &rc, 0);
+*/
+		//RECT rc = { 0 };
+		//DrawTextW(hdc, L"A.B!C", -1, &rc, DT_CALCRECT);
+		//DrawTextW(hdc, L"A.B!C", -1, &rc, 0);
+
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:

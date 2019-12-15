@@ -3,7 +3,7 @@
 
 #define PATH_MAX_GLYPH_FILE_NAME_LENGTH 33
 
-PWSTR Path_GetCombined(WCHAR szBeginPath[], WCHAR szEndPath[])
+PWSTR Path_GetCombined(CONST WCHAR szBeginPath[], CONST WCHAR szEndPath[])
 {
 	PWSTR szFullPath = calloc(MAX_PATH, sizeof(WCHAR));
 	PWSTR szResult = PathCombineW(szFullPath, szBeginPath, szEndPath);

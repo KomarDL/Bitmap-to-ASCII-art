@@ -1,6 +1,7 @@
 #pragma once
+#define UNICODE
+#define _UNICODE
 
-#include <stdbool.h>
 #include <tchar.h>
 #include <Shlwapi.h>
 
@@ -8,7 +9,7 @@
 
 #define PATH_CURRENT_DIRECTORY L"."
 
-PWSTR Path_GetCombined(WCHAR szBeginPath[], WCHAR szEndPath[]);
+PWSTR Path_GetCombined(CONST WCHAR szBeginPath[], CONST WCHAR szEndPath[]);
 
 void Path_ReleaseCombined(PWSTR szDirPath);
 
