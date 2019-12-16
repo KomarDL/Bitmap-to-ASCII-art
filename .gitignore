@@ -54,5 +54,6 @@ dkms.conf
 #Folders
 .vs
 
-#Image for testing
+#Binary data files
 *.bmp
+*.glf
