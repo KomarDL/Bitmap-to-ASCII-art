@@ -1,8 +1,4 @@
 #pragma once
-#define UNICODE
-#define _UNICODE
-
-#include <tchar.h>
 #include <Shlwapi.h>
 
 #pragma comment(lib, "shlwapi.lib")
