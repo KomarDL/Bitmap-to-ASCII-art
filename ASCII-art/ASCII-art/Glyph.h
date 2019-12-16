@@ -1,6 +1,6 @@
 #pragma once
-#define UNICODE
-#define _UNICODE
+//#define UNICODE
+//#define _UNICODE
 
 #include <Windows.h>
 #include <stdio.h>
