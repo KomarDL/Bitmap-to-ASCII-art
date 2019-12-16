@@ -3,7 +3,7 @@
 #include "Font.h"
 #include "FirstStartInitialization.h"
 
-HDC CreateMemoryDC(HDC hdc)
+HDC Fi_CreateMemoryDC(HDC hdc)
 {
 	HDC hdcResult = CreateCompatibleDC(hdc);
 	if (!hdcResult)
@@ -36,9 +36,9 @@ HDC CreateMemoryDC(HDC hdc)
 	return hdcResult;
 }
 
-BOOL SaveAllGlyphs(HDC hdc, PZPCWSTR pszFileNames, CONST WCHAR szSymbols[], CONST WCHAR szGlyphDirPath[])
+BOOL Fi_SaveAllGlyphs(HDC hdc, PZPCWSTR pszFileNames, CONST WCHAR szSymbols[], CONST WCHAR szGlyphDirPath[])
 {
-	HDC hdcMem = CreateMemoryDC(hdc);
+	HDC hdcMem = Fi_CreateMemoryDC(hdc);
 
 	BOOL fResult = (hdcMem != NULL);
 	if (fResult)
@@ -55,6 +55,59 @@ BOOL SaveAllGlyphs(HDC hdc, PZPCWSTR pszFileNames, CONST WCHAR szSymbols[], CONS
 	return fResult;
 }
 
+PGlBrightness* Fi_GetBrightness(PZPCWSTR pszFileNames, CONST WCHAR szGlyphDirPath[], SIZE_T stResultLenght)
+{
+	BOOL fResult = TRUE;
+	PGlBrightness* ppgbResult = calloc(stResultLenght, sizeof(GlBrightness));
+	if (ppgbResult != NULL)
+	{
+		SIZE_T i = -1;
+
+		while (++i < stResultLenght && fResult)
+		{
+			PWSTR szPath = Path_GetCombined(szGlyphDirPath, pszFileNames[i]);
+			ppgbResult[i] = Glyph_GetBrightness(szPath);
+			fResult = (ppgbResult[i] != NULL);
+			Path_ReleaseCombined(szPath);
+		}
+		
+		if (!fResult)
+		{
+			for (SIZE_T j = 0; j < i; ++j)
+			{
+				free(ppgbResult[i]);
+			}
+			free(ppgbResult);
+			ppgbResult = NULL;
+		}
+	}
+	return ppgbResult ;
+}
+
+BOOL Fi_SaveBrightness(PGlBrightness* ppgb, SIZE_T stArrLenght,CONST WCHAR szPath[])
+{
+	HANDLE hFile = CreateFileW(szPath, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+								CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		return FALSE;
+	}
+
+	BOOL fContinue = TRUE;
+	for (SIZE_T i = 0; i < stArrLenght && fContinue; ++i)
+	{
+		DWORD dwBytesWritten = 0;
+		WriteFile(hFile, (LPVOID)ppgb[i], sizeof(GlBrightness), &dwBytesWritten, NULL);
+	}
+
+	CloseHandle(hFile);
+	if (!fContinue)
+	{
+		DeleteFileW(szPath);
+	}
+	return fContinue;
+}
+
 BOOL FirstStart_CreateDataFiles(HDC hdc, CONST WCHAR szDataPath[], CONST WCHAR szSymbols[], CONST WCHAR szGlyphDirPath[])
 {
 	PZPWSTR pszFileNames;
@@ -65,27 +118,23 @@ BOOL FirstStart_CreateDataFiles(HDC hdc, CONST WCHAR szDataPath[], CONST WCHAR s
 		fResult = (pszFileNames != NULL);
 		if (fResult)
 		{
-			fResult = SaveAllGlyphs(hdc, pszFileNames, szSymbols, szGlyphDirPath);
+			//if all glyphs saved successfully
+			if (Fi_SaveAllGlyphs(hdc, pszFileNames, szSymbols, szGlyphDirPath))
+			{
+				PGlBrightness* ppgb = Fi_GetBrightness(pszFileNames, szGlyphDirPath, wcslen(szSymbols));
+				fResult = (ppgb != NULL);
+				//if brightness geted successfully
+				if (fResult)
+				{
+					fResult = Fi_SaveBrightness(ppgb, wcslen(szSymbols), szDataPath);
+				}
+			}
+			Path_ReleaseGlyphsFileNames(pszFileNames, wcslen(szSymbols));
 		}
 		else
 		{
 			RemoveDirectoryW(szGlyphDirPath);
 		}
-
-		/*PGlBrightness pgb = calloc(wcslen(szSymbols), sizeof(GlBrightness));
-		fResult = (pgb != NULL);
-		if (fResult)
-		{
-			SIZE_T i = -1;
-			while (++i < wcslen(szSymbols) && fResult)
-			{
-				PWSTR szPath = Path_GetCombined(szGlyphDirPath, pszFileNames[i]);
-				pgb = Glyph_GetBrightness(szPath);
-				Path_ReleaseCombined(szPath);
-			}
-		}*/
-
-		Path_ReleaseGlyphsFileNames(pszFileNames, wcslen(szSymbols));
 	}
 	return fResult;
 }

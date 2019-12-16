@@ -21,9 +21,10 @@
 
 typedef struct _GlyphBrightness
 {
-	LONG top[3];
-	LONG middle[3];
-	LONG bottom[3];
+	BYTE up, down;
+	BYTE left, right;
+	BYTE center;
 } GlBrightness, *PGlBrightness;
 
 BOOL Glyph_Save(HDC hdc, PCWSTR szPath, WCHAR wchSymbol);
+PGlBrightness Glyph_GetBrightness(WCHAR szPath[]);

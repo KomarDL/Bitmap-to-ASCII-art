@@ -1,4 +1,10 @@
+#include <math.h>
 #include "Glyph.h"
+
+#define PARTS_AMOUNT 3
+#define GAMMA_CORRECTION(colorValue) (255 * pow(colorValue / 255.0, 1.0 / 2.2))
+#define KB 0.114
+#define KR 0.299
 
 //SIZE Glyph_GetSize(HDC hdcMem, UINT uSymbol)
 //{
@@ -108,8 +114,6 @@
 //{
 //	free(pbGlyph);}
 
-
-
 BOOL Glyph_Save(HDC hdcMem, PCWSTR szPath, WCHAR wchSymbol)
 {
 	RECT rc = { 0 };
@@ -188,4 +192,116 @@ BOOL Glyph_Save(HDC hdcMem, PCWSTR szPath, WCHAR wchSymbol)
 	//Close the handle for the file that was created
 	CloseHandle(hFile);
 	return TRUE;
+}
+
+BYTE Gl_GetAreaBrightness(PINT32 pi32Bmp, RECT rc)
+{
+	ULONG64 ul64Acumulatoare = 0;
+	SIZE_T ulElementAmount = (rc.right - rc.left + 1) * (rc.bottom - rc.top + 1);
+	SIZE_T i = -1;
+	while (++i < ulElementAmount)
+	{
+		DOUBLE firstTerm = KR * GAMMA_CORRECTION(GetRValue(*pi32Bmp));
+		DOUBLE secondTerm = (1 - KR - KB) * GAMMA_CORRECTION(GetGValue(*pi32Bmp));
+		DOUBLE thirdTerm = KB * GetBValue(*pi32Bmp);
+		ul64Acumulatoare += (LONG)(firstTerm + secondTerm + thirdTerm);
+		pi32Bmp++;
+	}
+	
+	BYTE bResult = (BYTE)(ul64Acumulatoare / ulElementAmount);
+	return bResult;
+}
+
+GlBrightness Gl_GetBrightness(CONST PBYTE pbBmpFile)
+{
+	GlBrightness glbResult = { 0 };
+	CONST BITMAPFILEHEADER bmfHeader = *(PBITMAPFILEHEADER)pbBmpFile;
+	CONST BITMAPINFOHEADER bi = *(PBITMAPINFOHEADER)(pbBmpFile + sizeof(BITMAPFILEHEADER));
+	CONST PINT32 pi32Bitmap = (PINT32)(pbBmpFile + bmfHeader.bfOffBits);
+
+	DWORD dwHeightStep	= bi.biHeight / PARTS_AMOUNT;
+	DWORD dwWidthStep	= bi.biWidth / PARTS_AMOUNT;
+
+	RECT rc;
+	rc.top = 0;
+	rc.left = 0;
+	rc.bottom = dwHeightStep;
+	rc.right = bi.biWidth - 1;
+	glbResult.up = Gl_GetAreaBrightness(pi32Bitmap, rc);
+
+	rc.top = bi.biHeight - 1 - dwHeightStep;
+	rc.left = 0;
+	rc.bottom = bi.biHeight - 1;
+	rc.right = bi.biWidth - 1;
+	glbResult.down = Gl_GetAreaBrightness(pi32Bitmap, rc);
+
+	rc.top = 0;
+	rc.left = 0;
+	rc.bottom = bi.biHeight - 1;
+	rc.right = dwWidthStep;
+	glbResult.left = Gl_GetAreaBrightness(pi32Bitmap, rc);
+	
+	rc.top = 0;
+	rc.left = bi.biWidth - 1 - dwWidthStep;
+	rc.bottom = bi.biHeight - 1;
+	rc.right = bi.biWidth - 1;
+	glbResult.right = Gl_GetAreaBrightness(pi32Bitmap, rc);
+
+	rc.top = dwHeightStep + 1;
+	rc.left = dwWidthStep + 1;
+	rc.bottom = bi.biHeight - 1 - dwHeightStep;
+	rc.right = bi.biWidth - 1 - dwWidthStep;
+	glbResult.center= Gl_GetAreaBrightness(pi32Bitmap, rc);
+
+	return glbResult;
+}
+
+PGlBrightness Glyph_GetBrightness(WCHAR szPath[])
+{
+	HANDLE hFile = CreateFileW(szPath, GENERIC_READ, FILE_SHARE_READ, NULL, 
+								OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		return NULL;
+	}
+
+	SIZE_T dwFileSize = (SIZE_T)GetFileSize(hFile, NULL);
+	if (dwFileSize == INVALID_FILE_SIZE)
+	{
+		CloseHandle(hFile);
+		return NULL;
+	}
+
+	HANDLE hMapping = CreateFileMappingW(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+	if (hMapping == NULL)
+	{
+		CloseHandle(hFile);
+		return NULL;
+	}
+
+	PGlBrightness pgbResult = NULL;
+	PVOID pvData = MapViewOfFile(hMapping, FILE_MAP_READ, 0, 0, dwFileSize);
+	if (pvData == NULL)
+	{
+		CloseHandle(hMapping);
+		CloseHandle(hFile);
+		return NULL;
+	}
+	
+	pgbResult = calloc(1, sizeof(GlBrightness));
+	if (pgbResult == NULL)
+	{
+		UnmapViewOfFile(pvData);
+		CloseHandle(hMapping);
+		CloseHandle(hFile);
+		return NULL;
+	}
+
+	*pgbResult = Gl_GetBrightness(pvData);
+
+	UnmapViewOfFile(pvData);
+	CloseHandle(hMapping);
+	CloseHandle(hFile);
+
+	return pgbResult;
 }
