@@ -1,21 +1,25 @@
-#define UNICODE
-#define _UNICODE
+//#define UNICODE
+//#define _UNICODE
 
 #include <windows.h>
 #include <stdlib.h>
 #include <wingdi.h>
+#include <wchar.h>
 #include "Glyph.h"
 #include "Path.h"
 #include "FirstStartInitialization.h"
 #include "Font.h"
+#include "Dialog.h"
+
+#define IMAGE_EXTENSION L"bmp"
 
 // Global variables
 
 // The main window class name.
-WCHAR szWindowClass[] = L"Spreadsheet";
+WCHAR szWindowClass[] = L"To ASCII-art";
 
 // The string that appears in the application's title bar.
-WCHAR szTitle[] = L"Spreadsheet";
+WCHAR szTitle[] = L"To ASCII-art";
 
 CONST WCHAR szDataPath[] = L"Data.glf";
 
@@ -27,8 +31,11 @@ HINSTANCE hInst;
 HFONT hfOld = NULL;
 HFONT hfNew = NULL;
 
+//all symbols
 CONST WCHAR szSymbols[] = L"!`.,:;/\\%&*?@#=";
 
+//Glyphs brightness
+PGlBrightness pglGlyphs = NULL;
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -111,6 +118,31 @@ INT CALLBACK WinMain(
 	MSG msg;
 	BOOL bRet;
 
+	/*HACCEL hAccel = LoadAcceleratorsW(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR));
+	BOOL bRet = 0;
+	while (bRet = GetMessageW(&msg, NULL, 0, 0))
+	{
+		if (-1 == bRet)
+		{
+			MessageBoxW(NULL,
+				L"Call to GetMessage failed!",
+				L"Windows Desktop Guided Tour",
+				MB_ICONERROR);
+			return -1;
+		}
+		else
+		{
+			if (!TranslateAcceleratorW(hWnd, hAccel, &msg))
+			{
+				if (!IsDialogMessageW(hWnd, &msg))
+				{
+					TranslateMessage(&msg);
+					DispatchMessageW(&msg);
+				}
+			}
+		}
+	}*/
+
 	while ((bRet = GetMessageW(&msg, NULL, 0, 0)) != 0)
 	{
 		if (bRet == -1)
@@ -159,72 +191,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					L"Windows Desktop Guided Tour",
 					MB_ICONERROR);
 				SendMessageW(hWnd, WM_DESTROY, 0, 0);
+				return 0;
 			}
 		}
-
 		ReleaseDC(hWnd, hdc);
-		//PWSTR szDirPath = Path_GetCombined(PATH_CURRENT_DIRECTORY, GLYPH_DIRECTORY_NAME);
-		//if (szDirPath != NULL)
-		//{
-		//	if (!PathFileExists(szDirPath))
-		//	{
-		//		fContinue = CreateDirectory(szDirPath, NULL);
-		//		if (fContinue)
-		//		{
-		//			//Glyph_StrToGlyphs(szSymbols, szDirPath);
-		//		}
-		//	}
-		//	else
-		//	{
-		//		fContinue = PathIsDirectory(szDirPath);
-		//		if (fContinue)
-		//		{
-		//			if (PathIsDirectoryEmpty(szDirPath))
-		//			{
-		//				//Glyph_StrToGlyphs(szSymbols, szDirPath);
-		//			}
-		//		}
-		//		else
-		//		{
-		//			//msg for user
-		//		}
-		//	}
-		//}
-		//Path_ReleaseCombined(&szDirPath);
-		//if (!fContinue)
-		//{
-		//	PostQuitMessage(0);
-		//}
-		//else
-		//{
-		//	hdc = GetDC(hWnd);
 
-		
-		
-		//}
+		//loading brightness for each glyph
+		pglGlyphs = Glyph_LoadAllBrightness(szDataPath, wcslen(szSymbols));
 
+		if (pglGlyphs == NULL)
+		{
+			MessageBoxW(NULL,
+				L"Can't read .glf file",
+				L"Windows Desktop Guided Tour",
+				MB_ICONERROR);
+			SendMessageW(hWnd, WM_DESTROY, 0, 0);
+			return 0;
+		}
+
+		OPENFILENAMEW ofn = { 0 };
+		if (Dialog_Open(hWnd, &ofn))
+		{
+			if (wmemcmp(ofn.lpstrFile + ofn.nFileExtension, IMAGE_EXTENSION, sizeof(IMAGE_EXTENSION)) == 0)
+			{
+
+			}
+			else
+			{
+				MessageBoxW(NULL,
+					L"Wrong file type",
+					L"Windows Desktop Guided Tour",
+					MB_ICONERROR);
+			}
+		}
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-
-		
-
-		/*SIZE sBitmap = Glyph_GetSize(hdc, L'A');
-		DWORD dwGlyphSize;
-		PBYTE pbGlyph = Glyph_Get(hdc, L'A', &dwGlyphSize);
-		Glyph_Save(pbGlyph, dwGlyphSize, sBitmap, L"1.bmp");
-		Glyph_Release(pbGlyph);
-*/
-		//RECT rc = { 0 };
-		//DrawTextW(hdc, L"A.B!C", -1, &rc, DT_CALCRECT);
-		//DrawTextW(hdc, L"A.B!C", -1, &rc, 0);
 
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-		
+
 	}
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
