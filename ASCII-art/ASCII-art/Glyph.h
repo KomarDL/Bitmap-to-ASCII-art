@@ -4,8 +4,6 @@
 
 #include <Windows.h>
 #include <stdio.h>
-#include <tchar.h>
-#include <stdbool.h>
 
 #define GLYPH_PALLETE_SIZE 65
 #define GLYPH_MAX_COLOR_SHADES 256
@@ -28,3 +26,4 @@ typedef struct _GlyphBrightness
 
 BOOL Glyph_Save(HDC hdc, PCWSTR szPath, WCHAR wchSymbol);
 PGlBrightness Glyph_GetBrightness(WCHAR szPath[]);
+PGlBrightness Glyph_LoadAllBrightness(PCWSTR szDataFile, SIZE_T stLength);

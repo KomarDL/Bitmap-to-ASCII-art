@@ -194,6 +194,33 @@ BOOL Glyph_Save(HDC hdcMem, PCWSTR szPath, WCHAR wchSymbol)
 	return TRUE;
 }
 
+PGlBrightness Glyph_LoadAllBrightness(PCWSTR szDataFile, SIZE_T stLength)
+{
+	PGlBrightness pgbResult = calloc(stLength, sizeof(GlBrightness));
+	if (pgbResult == NULL)
+	{
+		return NULL;
+	}
+
+	HANDLE hFile = CreateFileW(szDataFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		free(pgbResult);
+		return NULL;
+	}
+
+	for (SIZE_T i = 0; i < stLength && pgbResult != NULL; ++i)
+	{
+		if (!ReadFile(hFile, &pgbResult[i], sizeof(GlBrightness), NULL, NULL))
+		{
+			free(pgbResult);
+			pgbResult = NULL;
+		}
+	}
+	CloseHandle(hFile);
+	return pgbResult;
+}
+
 BYTE Gl_GetAreaBrightness(PINT32 *ppi32Bmp, RECT rc)
 {
 	DOUBLE ul64Acumulatoare = 0;
