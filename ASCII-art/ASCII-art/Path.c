@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "Path.h"
+#include "Glyph.h"
 
 #define PATH_MAX_GLYPH_FILE_NAME_LENGTH 33
 
@@ -70,4 +71,42 @@ void Path_ReleaseGlyphsFileNames(PZPWSTR pszNames, SIZE_T stLength)
 		free(pszNames[i]);
 	}
 	free(pszNames);
+}
+
+PZPWSTR Path_GetAllGlyphs(CONST WCHAR szSymbols[], CONST WCHAR szExtention[], CONST WCHAR szDirPath[])
+{
+	PZPWSTR pszFileNames = Path_GetGlyphsFileNames(szSymbols, GLYPH_FILE_EXTENSION);
+	if (pszFileNames == NULL)
+	{
+		return NULL;
+	}
+
+	PZPWSTR pszResult = calloc(wcslen(szSymbols), sizeof(PWSTR));
+	if (pszResult == NULL)
+	{
+		Path_ReleaseGlyphsFileNames(pszFileNames, wcslen(szSymbols));
+		return NULL;
+	}
+
+	SIZE_T i = 0;
+	BOOL fContinue = TRUE;
+	while (i < wcslen(szSymbols) && fContinue)
+	{
+		pszResult[i] = Path_GetCombined(szDirPath, pszFileNames[i]);
+		fContinue = (pszResult[i] != NULL);
+		++i;
+	}
+
+	if (!fContinue)
+	{
+		Path_ReleaseGlyphsFileNames(pszFileNames, wcslen(szSymbols));
+		for (SIZE_T j = 0; j < i; ++j)
+		{
+			Path_ReleaseCombined(pszResult[i]);
+		}
+		free(pszResult);
+		pszResult = NULL;
+	}
+
+	return pszResult;
 }
