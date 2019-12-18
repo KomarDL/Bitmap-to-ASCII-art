@@ -10,6 +10,8 @@
 #include "FirstStartInitialization.h"
 #include "Font.h"
 #include "Dialog.h"
+#include "Menu.h"
+#include "Shortcat.h"
 
 #define IMAGE_EXTENSION L"bmp"
 
@@ -20,6 +22,8 @@ WCHAR szWindowClass[] = L"To ASCII-art";
 
 // The string that appears in the application's title bar.
 WCHAR szTitle[] = L"To ASCII-art";
+
+WCHAR szHelpMsg[] = L"";
 
 CONST WCHAR szDataPath[] = L"Data.glf";
 
@@ -58,7 +62,7 @@ INT CALLBACK WinMain(
 	wcex.hIcon = LoadIcon(hInstance, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;
+	wcex.lpszMenuName = MAKEINTRESOURCEW(IDR_MENU);
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 
@@ -75,22 +79,12 @@ INT CALLBACK WinMain(
 	// Store instance handle in our global variable
 	hInst = hInstance;
 
-	// The parameters to CreateWindow explained:
-	// szWindowClass: the name of the application
-	// szTitle: the text that appears in the title bar
-	// WS_OVERLAPPEDWINDOW: the type of window to create
-	// CW_USEDEFAULT, CW_USEDEFAULT: initial position (x, y)
-	// 500, 100: initial size (width, length)
-	// NULL: the parent of this window
-	// NULL: this application does not have a menu bar
-	// hInstance: the first parameter from WinMain
-	// NULL: not used in this application
 	HWND hWnd = CreateWindowW(
 		szWindowClass,
 		szTitle,
-		WS_OVERLAPPEDWINDOW,
+		(WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX) &~(WS_THICKFRAME | WS_MAXIMIZEBOX),
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		500, 500,
+		0, 0,
 		NULL,
 		NULL,
 		hInstance,
@@ -118,8 +112,16 @@ INT CALLBACK WinMain(
 	MSG msg;
 	BOOL bRet;
 
-	/*HACCEL hAccel = LoadAcceleratorsW(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR));
-	BOOL bRet = 0;
+	HACCEL hAccel = LoadAcceleratorsW(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR));
+	if (hAccel == NULL)
+	{
+		MessageBoxW(NULL,
+			L"Call to LoadAccelerators failed!",
+			L"Windows Desktop Guided Tour",
+			MB_ICONERROR);
+		return -1;
+	}
+
 	while (bRet = GetMessageW(&msg, NULL, 0, 0))
 	{
 		if (-1 == bRet)
@@ -134,41 +136,17 @@ INT CALLBACK WinMain(
 		{
 			if (!TranslateAcceleratorW(hWnd, hAccel, &msg))
 			{
-				if (!IsDialogMessageW(hWnd, &msg))
-				{
+				
 					TranslateMessage(&msg);
 					DispatchMessageW(&msg);
-				}
+				
 			}
-		}
-	}*/
-
-	while ((bRet = GetMessageW(&msg, NULL, 0, 0)) != 0)
-	{
-		if (bRet == -1)
-		{
-			MessageBoxW(NULL,
-				L"Call to GetMessage failed!",
-				L"Windows Desktop Guided Tour",
-				MB_ICONERROR);
-			return -1;
-		}
-		else
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
 		}
 	}
 
 	return (INT)msg.wParam;
 }
 
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -208,23 +186,46 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SendMessageW(hWnd, WM_DESTROY, 0, 0);
 			return 0;
 		}
-
-		OPENFILENAMEW ofn = { 0 };
-		if (Dialog_Open(hWnd, &ofn))
-		{
-			if (wmemcmp(ofn.lpstrFile + ofn.nFileExtension, IMAGE_EXTENSION, sizeof(IMAGE_EXTENSION)) == 0)
-			{
-
-			}
-			else
-			{
-				MessageBoxW(NULL,
-					L"Wrong file type",
-					L"Windows Desktop Guided Tour",
-					MB_ICONERROR);
-			}
-		}
+		//maximize Window
+		SendMessageW(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
 		break;
+	case WM_COMMAND:
+
+		switch (LOWORD(wParam))
+		{
+		case ID_MENU_OPEN:
+			OPENFILENAMEW ofn = { 0 };
+			if (Dialog_Open(hWnd, &ofn))
+			{
+				fContinue = (wmemcmp(ofn.lpstrFile + ofn.nFileExtension, IMAGE_EXTENSION, sizeof(IMAGE_EXTENSION)) == 0);
+				if (fContinue)
+				{
+					
+				}
+				
+				if (!fContinue)
+				{
+					MessageBoxW(NULL,
+						L"Wrong file type",
+						L"Windows Desktop Guided Tour",
+						MB_ICONERROR);
+				}
+			}
+			break;
+		case ID_MENU_HELP:
+			MessageBoxW(hWnd, szHelpMsg, L"Help", MB_ICONINFORMATION);
+			break;
+		case ID_MENU_EXIT:
+			PostQuitMessage(0);
+			break;
+		}
+	case WM_MOVING:
+		//disable moving
+		if (lParam)
+		{
+			PRECT lpRect = (LPRECT)lParam;
+			GetWindowRect(hWnd, lpRect);
+		}
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 
