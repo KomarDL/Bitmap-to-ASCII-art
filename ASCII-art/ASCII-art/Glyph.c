@@ -6,114 +6,6 @@
 #define KB 0.114
 #define KR 0.299
 
-//SIZE Glyph_GetSize(HDC hdcMem, UINT uSymbol)
-//{
-//	SIZE sResult = { -1, -1 };
-//	/*  Prepare glyph transformation matrix (no rotation)  */
-//	MAT2 mt;
-//	memset(&mt, 0, sizeof(mt));
-//	mt.eM11.value = 1;
-//	mt.eM22.value = 1;
-//
-//	GLYPHMETRICS gm;
-//	DWORD dwSize = GetGlyphOutlineW(hdcMem, uSymbol, GGO_GRAY8_BITMAP, &gm, 0, NULL, &mt);
-//	if (dwSize != GDI_ERROR)
-//	{
-//		sResult.cx = gm.gmBlackBoxX;
-//		sResult.cy = gm.gmBlackBoxY;
-//	}
-//	return sResult;
-//}
-//
-//PBYTE Glyph_Get(HDC hdcMem, UINT uSymbol, PDWORD pdwBufferSize)
-//{
-//	/*  Prepare glyph transformation matrix (no rotation)  */
-//	MAT2 mt;
-//	memset(&mt, 0, sizeof(mt));
-//	mt.eM11.value = 1;
-//	mt.eM22.value = 1;
-//
-//	GLYPHMETRICS gm;
-//	*pdwBufferSize = GetGlyphOutlineW(hdcMem, uSymbol, GGO_GRAY8_BITMAP, &gm, 0, NULL, &mt);
-//	if (*pdwBufferSize == GDI_ERROR)
-//	{
-//		return NULL;
-//	}
-//	PBYTE pbResult = (PBYTE)calloc(*pdwBufferSize, sizeof(BYTE));
-//	UINT uiOtmBuffSize = GetOutlineTextMetricsW(hdcMem, 0, NULL);
-//	POUTLINETEXTMETRICW potm = malloc(uiOtmBuffSize);
-//	GetOutlineTextMetricsW(hdcMem, uiOtmBuffSize, potm);
-//	gm.gmCellIncX = gm.gmCellIncY = potm->otmEMSquare;
-//	DWORD dwGetGlyphOutlineResult = GetGlyphOutlineW(hdcMem, uSymbol, GGO_GRAY8_BITMAP, &gm, (*pdwBufferSize), pbResult, &mt);
-//	if (dwGetGlyphOutlineResult == GDI_ERROR)
-//	{
-//		free(pbResult);
-//		*pdwBufferSize = -1;
-//		return NULL;
-//	}
-//	return pbResult;
-//}
-//
-//void Glyph_WritePallete(FILE *pf, DWORD dwPalleteSize)
-//{
-//	RGBQUAD rgbqd = { 0 };
-//	INT iStep = GLYPH_MAX_COLOR_SHADES / (dwPalleteSize - 1);
-//	INT iShadeOfGray = GLYPH_MAX_COLOR_SHADES - 1;
-//	for (UINT i = 0; i < dwPalleteSize - 1; ++i)
-//	{
-//		rgbqd.rgbRed = iShadeOfGray;
-//		rgbqd.rgbGreen = iShadeOfGray;
-//		rgbqd.rgbBlue = iShadeOfGray;
-//		iShadeOfGray -= iStep;
-//		fwrite(&rgbqd, sizeof(RGBQUAD), 1, pf);
-//	}
-//	rgbqd.rgbRed = 0;
-//	rgbqd.rgbGreen = 0;
-//	rgbqd.rgbBlue = 0;
-//	fwrite(&rgbqd, sizeof(RGBQUAD), 1, pf);
-//}
-//
-//
-//void Glyph_Save(BYTE pbData[], DWORD dwDataSize, SIZE sBitmap, CONST WCHAR szPath[])
-//{
-//	BITMAPINFOHEADER bi = { 0 };
-//	bi.biSize = sizeof(BITMAPINFOHEADER);
-//	bi.biWidth = sBitmap.cx;
-//	bi.biHeight = -sBitmap.cy;
-//	bi.biPlanes = 1;
-//	bi.biBitCount = 8;
-//	bi.biCompression = BI_RGB;
-//	bi.biClrUsed = GLYPH_PALLETE_SIZE;
-//	bi.biSizeImage = dwDataSize;
-//	/*bi.bmiColors->rgbRed = 255;
-//	bi.bmiColors->rgbGreen = 255;
-//	bi.bmiColors->rgbBlue = 255;*/
-//
-//	BITMAPFILEHEADER bf = { 0 };
-//	bf.bfType = ('M' << 8) | 'B';
-//	bf.bfSize = (DWORD)(sizeof(BITMAPFILEHEADER) 
-//		+ bi.biSize + bi.biClrUsed
-//		* sizeof(RGBQUAD) + bi.biSizeImage);
-//
-//	bf.bfOffBits = (DWORD) sizeof(BITMAPFILEHEADER) +
-//		bi.biSize + bi.biClrUsed
-//		* sizeof(RGBQUAD);
-//	
-//	FILE *pf;
-//	int writeRes = _wfopen_s(&pf, szPath, L"wb");
-//	writeRes = fwrite(&bf, sizeof(bf), 1, pf);
-//	writeRes = fwrite(&bi, sizeof(bi), 1, pf);
-//
-//	Glyph_WritePallete(pf, bi.biClrUsed);
-//	
-//	writeRes = fwrite(pbData, dwDataSize, 1, pf);
-//	fclose(pf);
-//}
-//
-//void Glyph_Release(PBYTE pbGlyph)
-//{
-//	free(pbGlyph);}
-
 BOOL Glyph_Save(HDC hdcMem, PCWSTR szPath, WCHAR wchSymbol)
 {
 	RECT rc = { 0 };
@@ -138,7 +30,7 @@ BOOL Glyph_Save(HDC hdcMem, PCWSTR szPath, WCHAR wchSymbol)
 
 	BITMAPFILEHEADER   bmfHeader;
 	BITMAPINFOHEADER   bi = { 0 };
-
+	
 	bi.biSize = sizeof(BITMAPINFOHEADER);
 	bi.biWidth = bm.bmWidth;
 	bi.biHeight = bm.bmHeight;
@@ -178,7 +70,7 @@ BOOL Glyph_Save(HDC hdcMem, PCWSTR szPath, WCHAR wchSymbol)
 	bmfHeader.bfSize = dwSizeofDIB;
 
 	//bfType must always be BM for Bitmaps
-	bmfHeader.bfType = 0x4D42; //BM   
+	bmfHeader.bfType = BFTYPE_BM; //BM   
 
 	DWORD dwBytesWritten = 0;
 	WriteFile(hFile, (LPSTR)&bmfHeader, sizeof(BITMAPFILEHEADER), &dwBytesWritten, NULL);
@@ -221,7 +113,7 @@ PGlBrightness Glyph_LoadAllBrightness(PCWSTR szDataFile, SIZE_T stLength)
 	return pgbResult;
 }
 
-BYTE Gl_GetAreaBrightness(PINT32 *ppi32Bmp, RECT rc)
+BYTE Glyph_GetAreaBrightness(PINT32 *ppi32Bmp, RECT rc)
 {
 	DOUBLE ul64Acumulatoare = 0;
 	SIZE_T ulElementAmount = (rc.right - rc.left + 1) * (rc.bottom - rc.top + 1);
@@ -245,7 +137,7 @@ GlBrightness Gl_GetBrightness(CONST PBYTE pbBmpFile)
 	GlBrightness glbResult = { 0 };
 	CONST BITMAPFILEHEADER bmfHeader = *(PBITMAPFILEHEADER)pbBmpFile;
 	CONST BITMAPINFOHEADER bi = *(PBITMAPINFOHEADER)(pbBmpFile + sizeof(BITMAPFILEHEADER));
-	PBYTE pi32Bitmap = pbBmpFile + bmfHeader.bfOffBits;
+	PBYTE pbBitmap = pbBmpFile + bmfHeader.bfOffBits;
 
 	DWORD dwHeightStep	= bi.biHeight / PARTS_AMOUNT;
 	DWORD dwWidthStep	= bi.biWidth / PARTS_AMOUNT;
@@ -261,7 +153,7 @@ GlBrightness Gl_GetBrightness(CONST PBYTE pbBmpFile)
 	SIZE_T stColorBytesInRow = bi.biWidth * 4;
 	for (LONG i = 0; i < bi.biHeight; ++i)
 	{
-		ppi32[i] = (PINT32)(pi32Bitmap + stOffset);
+		ppi32[i] = (PINT32)(pbBitmap + stOffset);
 		stOffset += stColorBytesInRow;
 	}
 
@@ -270,31 +162,31 @@ GlBrightness Gl_GetBrightness(CONST PBYTE pbBmpFile)
 	rc.left = 0;
 	rc.bottom = dwHeightStep;
 	rc.right = bi.biWidth - 1;
-	glbResult.up = Gl_GetAreaBrightness(ppi32, rc);
+	glbResult.up = Glyph_GetAreaBrightness(ppi32, rc);
 
 	rc.top = bi.biHeight - 1 - dwHeightStep;
 	rc.left = 0;
 	rc.bottom = bi.biHeight - 1;
 	rc.right = bi.biWidth - 1;
-	glbResult.down = Gl_GetAreaBrightness(ppi32, rc);
+	glbResult.down = Glyph_GetAreaBrightness(ppi32, rc);
 
 	rc.top = 0;
 	rc.left = 0;
 	rc.bottom = bi.biHeight - 1;
 	rc.right = dwWidthStep;
-	glbResult.left = Gl_GetAreaBrightness(ppi32, rc);
+	glbResult.left = Glyph_GetAreaBrightness(ppi32, rc);
 	
 	rc.top = 0;
 	rc.left = bi.biWidth - 1 - dwWidthStep;
 	rc.bottom = bi.biHeight - 1;
 	rc.right = bi.biWidth - 1;
-	glbResult.right = Gl_GetAreaBrightness(ppi32, rc);
+	glbResult.right = Glyph_GetAreaBrightness(ppi32, rc);
 
 	rc.top = dwHeightStep + 1;
 	rc.left = dwWidthStep + 1;
 	rc.bottom = bi.biHeight - 1 - dwHeightStep;
 	rc.right = bi.biWidth - 1 - dwWidthStep;
-	glbResult.center= Gl_GetAreaBrightness(ppi32, rc);
+	glbResult.center= Glyph_GetAreaBrightness(ppi32, rc);
 
 	free(ppi32);
 	return glbResult;
@@ -340,6 +232,7 @@ PGlBrightness Glyph_GetBrightness(WCHAR szPath[])
 		CloseHandle(hFile);
 		return NULL;
 	}
+
 	GlBrightness glbTmp = Gl_GetBrightness(pvData);
 	if (!glbTmp.center && !glbTmp.down && !glbTmp.left && !glbTmp.right && !glbTmp.up)
 	{

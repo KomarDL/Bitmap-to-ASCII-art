@@ -8,6 +8,7 @@
 #define GLYPH_PALLETE_SIZE 65
 #define GLYPH_MAX_COLOR_SHADES 256
 #define GLYPH_FILE_EXTENSION L".bmp"
+#define BFTYPE_BM 0x4D42
 
 //PBYTE Glyph_Get(HDC hdc, UINT uSymbol, PDWORD pdwBufferSize);
 //
@@ -27,3 +28,4 @@ typedef struct _GlyphBrightness
 BOOL Glyph_Save(HDC hdc, PCWSTR szPath, WCHAR wchSymbol);
 PGlBrightness Glyph_GetBrightness(WCHAR szPath[]);
 PGlBrightness Glyph_LoadAllBrightness(PCWSTR szDataFile, SIZE_T stLength);
+BYTE Glyph_GetAreaBrightness(PINT32 *ppi32Bmp, RECT rc);
