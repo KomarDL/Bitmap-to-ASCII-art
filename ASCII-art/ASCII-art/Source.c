@@ -12,6 +12,7 @@
 #include "Dialog.h"
 #include "Menu.h"
 #include "Shortcat.h"
+#include "UserBitmap.h"
 
 #define IMAGE_EXTENSION L"bmp"
 
@@ -23,7 +24,7 @@ WCHAR szWindowClass[] = L"To ASCII-art";
 // The string that appears in the application's title bar.
 WCHAR szTitle[] = L"To ASCII-art";
 
-WCHAR szHelpMsg[] = L"";
+WCHAR szHelpMsg[] = L"Use menu or press CTR+O to open \"open file dialog\"\nSupported only .bmp files with 32 bits per pixel bitmaps";
 
 CONST WCHAR szDataPath[] = L"Data.glf";
 
@@ -31,15 +32,20 @@ CONST WCHAR szGlyphDirPath[] = L"Glyphs";
 
 HINSTANCE hInst;
 
-// old font handle
+// fonts
 HFONT hfOld = NULL;
 HFONT hfNew = NULL;
 
 //all symbols
-CONST WCHAR szSymbols[] = L"!`.,:;/\\%&*?@#=";
+CONST WCHAR szSymbols[] = L"`.,:;!/\\%&*?@#=";
 
 //Glyphs brightness
 PGlBrightness pglGlyphs = NULL;
+
+//ASCII-art string
+PZPWSTR pszAsciiArt = NULL;
+
+POINT pntArtSize = { 0 };
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -136,7 +142,7 @@ INT CALLBACK WinMain(
 		{
 			if (!TranslateAcceleratorW(hWnd, hAccel, &msg))
 			{
-				
+
 					TranslateMessage(&msg);
 					DispatchMessageW(&msg);
 				
@@ -157,11 +163,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		hdc = GetDC(hWnd);
 
-		Font_Initialize(hdc);
-
 		BOOL fContinue = TRUE;
 		if (!PathFileExistsW(szDataPath))
 		{
+			Font_InitializeFirstTime(hdc);
 			if (!FirstStart_CreateDataFiles(hdc, szDataPath, szSymbols, szGlyphDirPath))
 			{
 				MessageBoxW(NULL,
@@ -172,6 +177,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				return 0;
 			}
 		}
+		hfNew = CreateFontW(20, 20, 0, 0, FW_BOLD, 0, 0, 0, OEM_CHARSET,
+			OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+			FIXED_PITCH | FF_DONTCARE, NULL);
+		DeleteObject( SelectObject(hdc, hfNew) );
 		ReleaseDC(hWnd, hdc);
 
 		//loading brightness for each glyph
@@ -197,20 +206,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			OPENFILENAMEW ofn = { 0 };
 			if (Dialog_Open(hWnd, &ofn))
 			{
-				fContinue = (wmemcmp(ofn.lpstrFile + ofn.nFileExtension, IMAGE_EXTENSION, sizeof(IMAGE_EXTENSION)) == 0);
+				fContinue = (wmemcmp(&ofn.lpstrFile[ofn.nFileExtension], IMAGE_EXTENSION, wcslen(IMAGE_EXTENSION)) == 0);
 				if (fContinue)
 				{
-					
+					if (pszAsciiArt != NULL)
+					{
+						free(pszAsciiArt);
+					}
+
+					pszAsciiArt = UserBmp_ProcessFile(ofn.lpstrFile, szSymbols, pglGlyphs, &pntArtSize);
+
+					fContinue = pszAsciiArt != NULL;
+					if (fContinue)
+					{
+						InvalidateRect(hWnd, NULL, TRUE);
+					}					
 				}
 				
 				if (!fContinue)
 				{
 					MessageBoxW(NULL,
-						L"Wrong file type",
+						L"Something went wrong. Can't process this file",
 						L"Windows Desktop Guided Tour",
 						MB_ICONERROR);
 				}
 			}
+			free(ofn.lpstrFile);
 			break;
 		case ID_MENU_HELP:
 			MessageBoxW(hWnd, szHelpMsg, L"Help", MB_ICONINFORMATION);
@@ -228,7 +249,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-
+		if (pszAsciiArt != NULL)
+		{
+			RECT rc;
+			GetClientRect(hWnd, &rc);
+			SIZE_T stSize = pntArtSize.x * pntArtSize.y;
+			PWSTR szArt = calloc(stSize, sizeof(WCHAR));
+			for (LONG i = pntArtSize.y - 1; i >= 0; --i)
+			{
+				wcscat_s(szArt, stSize, pszAsciiArt[i]);
+			}
+			DeleteObject( SelectObject(hdc, Font_Select(hdc, szArt, rc)) );
+			DrawTextW(hdc, szArt, -1, &rc, DT_NOPREFIX);;
+			free(szArt);
+			DeleteObject(SelectObject(hdc, hfNew));
+		}
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:

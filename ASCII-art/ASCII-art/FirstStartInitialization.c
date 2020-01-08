@@ -11,7 +11,7 @@ HDC Fi_CreateMemoryDC(HDC hdc)
 		return NULL;
 	}
 
-	Font_Initialize(hdcResult);
+	Font_InitializeFirstTime(hdcResult);
 
 	RECT rc;
 	//Symbol doesn't matter
