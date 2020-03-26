@@ -3,13 +3,13 @@
 WinAPI program for displaying ".bmp" images in ASCII-art
 ## Examples
 ### Letter
-![Letter sourse](Pictures/source letter.bmp>
-![Letter result](Pictures/result letter.PNG>
+![](Pictures/source%20letter.bmp)
+![](Pictures/result%20letter.PNG)
 
 ### Panda
-![Panda sourse](Pictures/source panda .bmp>
-![Panda result](Pictures/result panda.PNG>
+![](Pictures/source%20panda%20.bmp)
+![](Pictures/result%20panda.PNG)
 
 ### Portrait
-![Portrait sourse](Pictures/source portrait.bmp>
-![Portrait result](Pictures/result portrait.PNG>
+![](Pictures/source%20portrait.bmp)
+![](Pictures/result%20portrait.PNG)
