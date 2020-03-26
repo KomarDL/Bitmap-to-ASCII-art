@@ -55,5 +55,4 @@ dkms.conf
 .vs
 
 #Binary data files
-*.bmp
 *.glf
