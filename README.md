@@ -3,19 +3,13 @@
 WinAPI program for displaying ".bmp" images in ASCII-art
 ## Examples
 ### Letter
-<p>
-<img src="Pictures/source letter.bmp" align="left" width="49%">
-<img src="Pictures/result letter.PNG" align="right" width="50%">
-</p>
+![Letter sourse](Pictures/source letter.bmp>
+![Letter result](Pictures/result letter.PNG>
 
 ### Panda
-<p>
-<img src="Pictures/source panda .bmp" align="left" width="49%">
-<img src="Pictures/result panda.PNG" align="right" width="50%">
-</p>
+![Panda sourse](Pictures/source panda .bmp>
+![Panda result](Pictures/result panda.PNG>
 
 ### Portrait
-<p>
-<img src="Pictures/source portrait.bmp" align="left" width="49%">
-<img src="Pictures/result portrait.PNG" align="right" width="50%">
-</p>
+![Portrait sourse](Pictures/source portrait.bmp>
+![Portrait result](Pictures/result portrait.PNG>
